@@ -137,13 +137,13 @@ class OverlayWidget(QWidget):
             event.accept()
 
     def mouseMoveEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.buttons() == Qt.LeftButton:
             delta = event.globalPosition().toPoint() - self.dragPos
             self.move(self.pos() + delta)
 
             self.dragPos = event.globalPosition().toPoint()
             event.accept()
-    
+            
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.dragPos = None
