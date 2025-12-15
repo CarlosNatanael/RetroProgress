@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer, QUrl, QByteArray
 from PySide6.QtGui import QPixmap
 from io import BytesIO
+from datetime import datetime
 try:
     from config import RA_USER, RA_API_KEY
 except ImportError:
@@ -13,7 +14,7 @@ except ImportError:
     RA_API_KEY = None
 
 # --- CONFIG ---
-UPDATE_INTERVAL_MS = 10000
+UPDATE_INTERVAL_MS = 5000
 RA_BASE_URL = "https://retroachievements.org/API"
 RA_IMG_BASE = "https://media.retroachievements.org"
 
@@ -23,7 +24,6 @@ class OverlayWidget(QWidget):
 
         self.current_game_id = 0
 
-        # Configurações de Janela (Sempre no topo, sem moldura, transparente)
         self.setWindowFlags(
             Qt.WindowStaysOnTopHint |
             Qt.FramelessWindowHint |
@@ -67,6 +67,7 @@ class OverlayWidget(QWidget):
 
         image_url = f"{RA_IMG_BASE}{icon_path}"
         try:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Fazendo download do emblema: {image_url}") # LOG
             response = requests.get(image_url, timeout=5)
             response.raise_for_status()
             
@@ -81,26 +82,32 @@ class OverlayWidget(QWidget):
             self.label_emblema.setPixmap(scaled_pixmap)
         
         except requests.exceptions.RequestException as e:
-            print(f"Erro ao baixar emblema: {e}")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Erro ao baixar emblema: {e}") # LOG
             self.label_emblema.setText("X")
         
     def update_progress(self):
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] --- INICIANDO REQUISIÇÕES (Intervalo: 5s) ---") # LOG
         try:
+            # --- PASSO 1: Obter o ID do Jogo Atual ---
             summary_url = f"{RA_BASE_URL}/API_GetUserSummary.php"
             summary_params = {'z': RA_USER, 'y': RA_API_KEY, 'u': RA_USER}
             
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Requisitando Sumário do Usuário...") # LOG
             summary_response = requests.get(summary_url, params=summary_params, timeout=10)
             summary_response.raise_for_status()
             summary_data = summary_response.json()
-            
+
             last_game_id = summary_data.get('LastGameID')
-            
+
             if not last_game_id or int(last_game_id) == 0:
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] Status: Nenhum jogo em progresso.") # LOG
                 self.label_progresso.setText("Nenhum jogo em progresso.")
                 self.label_emblema.clear()
                 return
-
+            
             self.current_game_id = last_game_id
+            
+            # --- PASSO 2: Obter o Progresso do Jogo Atual ---
             progress_url = f"{RA_BASE_URL}/API_GetGameInfoAndUserProgress.php"
             progress_params = {
                 'g': self.current_game_id, 
@@ -108,16 +115,19 @@ class OverlayWidget(QWidget):
                 'z': RA_USER,
                 'y': RA_API_KEY
             }
+            
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Requisitando Progresso do Game ID: {self.current_game_id}") # LOG
             progress_response = requests.get(progress_url, params=progress_params, timeout=10)
             progress_response.raise_for_status()
             progress_data = progress_response.json()
             
-            unlocked = progress_data.get('NumAwardedToUserHardcore', 0)
+            unlocked = progress_data.get('NumAwardedToUserHardcore', 0) 
             total = progress_data.get('NumAchievements', 0)
 
             game_title = progress_data.get('Title', 'Jogo Desconhecido')
 
             self.label_progresso.setText(f"{game_title}\n {unlocked}/{total}")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] SUCESSO. Progresso: {unlocked}/{total} ({game_title})") # LOG
 
             icon_path = progress_data.get('ImageIcon')
             self._fetch_and_set_emblen(icon_path)
@@ -125,10 +135,11 @@ class OverlayWidget(QWidget):
             self.adjustSize()
         
         except requests.exceptions.RequestException as e:
-            print(f"Erro de conexão API: {e}")
+            status_code = getattr(e.response, 'status_code', 'N/A')
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] ERRO de conexão/API (Status: {status_code}): {e}") # LOG DETALHADO
             self.label_progresso.setText("ERRO: Verifique a conexão, Usuario ou API Key.")
         except Exception as e:
-            print(f"Erro inesperado: {e}")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] ERRO inesperado: {e}") # LOG
             self.label_progresso.setText("ERRO")
 
     def mousePressEvent(self, event):
@@ -143,7 +154,7 @@ class OverlayWidget(QWidget):
 
             self.dragPos = event.globalPosition().toPoint()
             event.accept()
-
+            
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.dragPos = None
