@@ -206,27 +206,40 @@ class OverlayWidget(QWidget):
             self.dragPos = None
             event.accept()
 
-    def show_config_window(self): # NOVO
+    def show_config_window(self):
             """Para o timer, limpa as credenciais e reinicia o aplicativo."""
             self.timer.stop()
             clear_credentials()
             self.close()
             QApplication.instance().restart_required = True
 
-if __name__ == "__main__":
+def run_app():
     app = QApplication(sys.argv)
-    RA_USER, RA_API_KEY = load_credentials()
+    app.restart_required = False 
+    while True:
+        global RA_USER, RA_API_KEY
+        RA_USER, RA_API_KEY = load_credentials()
 
-    if not RA_USER or not RA_API_KEY:
-        config_dialog = ConfigWindow()
-        if config_dialog.exec():
-            RA_USER, RA_API_KEY = load_credentials()
+        if not RA_USER or not RA_API_KEY:
+            config_dialog = ConfigWindow()
+            if config_dialog.exec():
+                RA_USER, RA_API_KEY = load_credentials()
+            else:
+                return 0 
+        if RA_USER and RA_API_KEY:
+            widget = OverlayWidget()
+            widget.show()
+            
+            app.exec() 
+
+            if getattr(QApplication.instance(), 'restart_required', False):
+                QApplication.instance().restart_required = False
+                continue 
+            else:
+                return 0 
         else:
-            sys.exit(0)
-    if RA_USER and RA_API_KEY:
-        widget = OverlayWidget()
-        widget.show()
-        sys.exit(app.exec())
-    else:
-        QMessageBox.critical(None, "Erro Crítico", "As credenciais não foram fornecidas. O aplicativo será encerrado.")
-        sys.exit(1)
+            QMessageBox.critical(None, "Erro Crítico", "As credenciais não foram fornecidas. O aplicativo será encerrado.")
+            return 1
+
+if __name__ == "__main__":
+    sys.exit(run_app())
