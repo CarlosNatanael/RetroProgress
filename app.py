@@ -1,22 +1,54 @@
 import sys
 import requests
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QLabel, QHBoxLayout
+    QApplication, QWidget, QLabel, QHBoxLayout, QDialog, QLineEdit, QPushButton, QFormLayout, QMessageBox
 )
 from PySide6.QtCore import Qt, QTimer, QUrl, QByteArray
+from utilidades_config import load_credentials, save_credentials, clear_credentials
 from PySide6.QtGui import QPixmap
 from io import BytesIO
 from datetime import datetime
-try:
-    from config import RA_USER, RA_API_KEY
-except ImportError:
-    RA_USER = None
-    RA_API_KEY = None
 
 # --- CONFIG ---
 UPDATE_INTERVAL_MS = 5000
 RA_BASE_URL = "https://retroachievements.org/API"
 RA_IMG_BASE = "https://media.retroachievements.org"
+
+class ConfigWindow(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Configuração RetroProgress")
+        self.setFixedSize(350, 150)
+        self.creds_saved = False
+
+        layout = QFormLayout()
+
+        self.user_input = QLineEdit()
+        self.user_input.setPlaceholderText("Seu nome de Usuário RA")
+        layout.addRow("Usuário RA:", self.user_input)
+
+        self.key_input = QLineEdit()
+        self.key_input.setEchoMode(QLineEdit.Password)
+        self.key_input.setPlaceholderText("Sua chave de API RA")
+        layout.addRow("API Key:", self.key_input)
+
+        self.save_button = QPushButton("Salvar e Iniciar")
+        self.save_button.clicked.connect(self.save_and_start)
+        layout.addWidget(self.save_button)
+
+        self.setLayout(layout)
+
+    def save_and_start(self):
+        user = self.user_input.text().strip()
+        key = self.key_input.text().strip()
+
+        if not user or not key:
+            QMessageBox.warning(self, "Erro", "Usuário e Chave API")
+            return
+        
+        save_credentials(user, key)
+        self.creds_saved = True
+        self.accept()
 
 class OverlayWidget(QWidget):
     def __init__(self):
@@ -51,6 +83,11 @@ class OverlayWidget(QWidget):
         """)
         self.label_progresso.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.label_progresso)
+        self.config_button = QPushButton("⚙️")
+        self.config_button.setFixedSize(30, 30)
+        self.config_button.setFlat(True)
+        self.config_button.clicked.connect(self.show_config_window)
+        main_layout.addWidget(self.config_button)
 
         self.setLayout(main_layout)
 
@@ -136,11 +173,20 @@ class OverlayWidget(QWidget):
         
         except requests.exceptions.RequestException as e:
             status_code = getattr(e.response, 'status_code', 'N/A')
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] ERRO de conexão/API (Status: {status_code}): {e}") # LOG DETALHADO
+            if status_code == 401 or status_code == 403:
+                self.label_progresso.setText("ERRO: Credenciais RA Inválidas. Clique no ⚙️")
+                self.cred_error_state = True
+                self.timer.stop()
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] ERRO 401/403: Requer reconfiguração.")
+            else:
+                # Outros erros (conexão, servidor, etc.)
+                self.label_progresso.setText("ERRO: Verifique a conexão. (Status: {status_code})")
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] ERRO de conexão/API (Status: {status_code}): {e}") # LOG DETALHADO
             self.label_progresso.setText("ERRO: Verifique a conexão, Usuario ou API Key.")
         except Exception as e:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] ERRO inesperado: {e}") # LOG
             self.label_progresso.setText("ERRO")
+
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -160,11 +206,27 @@ class OverlayWidget(QWidget):
             self.dragPos = None
             event.accept()
 
-if __name__ == "__main__":
-    if not RA_USER or not RA_API_KEY:
-        print("Erro: configure RA_USER e RA_API_KEY")
+    def show_config_window(self): # NOVO
+            """Para o timer, limpa as credenciais e reinicia o aplicativo."""
+            self.timer.stop()
+            clear_credentials()
+            self.close()
+            QApplication.instance().restart_required = True
 
+if __name__ == "__main__":
     app = QApplication(sys.argv)
-    widget = OverlayWidget()
-    widget.show()
-    sys.exit(app.exec())
+    RA_USER, RA_API_KEY = load_credentials()
+
+    if not RA_USER or not RA_API_KEY:
+        config_dialog = ConfigWindow()
+        if config_dialog.exec():
+            RA_USER, RA_API_KEY = load_credentials()
+        else:
+            sys.exit(0)
+    if RA_USER and RA_API_KEY:
+        widget = OverlayWidget()
+        widget.show()
+        sys.exit(app.exec())
+    else:
+        QMessageBox.critical(None, "Erro Crítico", "As credenciais não foram fornecidas. O aplicativo será encerrado.")
+        sys.exit(1)
