@@ -88,23 +88,26 @@ class OverlayWidget(QWidget):
         try:
             summary_url = f"{RA_BASE_URL}/API_GetUserSummary.php"
             summary_params = {'z': RA_USER, 'y': RA_API_KEY, 'u': RA_USER}
-
+            
             summary_response = requests.get(summary_url, params=summary_params, timeout=10)
             summary_response.raise_for_status()
             summary_data = summary_response.json()
-
+            
             last_game_id = summary_data.get('LastGameID')
-
+            
             if not last_game_id or int(last_game_id) == 0:
-                self.label_progresso.setText("Nenhum jogo em progresso")
+                self.label_progresso.setText("Nenhum jogo em progresso.")
                 self.label_emblema.clear()
                 return
-            
+
             self.current_game_id = last_game_id
-
             progress_url = f"{RA_BASE_URL}/API_GetGameInfoAndUserProgress.php"
-            progress_params = {'g': self.current_game_id, 'u': RA_USER}
-
+            progress_params = {
+                'g': self.current_game_id, 
+                'u': RA_USER,
+                'z': RA_USER,
+                'y': RA_API_KEY
+            }
             progress_response = requests.get(progress_url, params=progress_params, timeout=10)
             progress_response.raise_for_status()
             progress_data = progress_response.json()
@@ -128,6 +131,23 @@ class OverlayWidget(QWidget):
             print(f"Erro inesperado: {e}")
             self.label_progresso.setText("ERRO")
 
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragPos = event.globalPosition().toPoint()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            delta = event.globalPosition().toPoint() - self.dragPos
+            self.move(self.pos() + delta)
+
+            self.dragPos = event.globalPosition().toPoint()
+            event.accept()
+    
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragPos = None
+            event.accept()
 
 if __name__ == "__main__":
     if not RA_USER or not RA_API_KEY:
