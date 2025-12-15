@@ -13,7 +13,7 @@ except ImportError:
     RA_API_KEY = None
 
 # --- CONFIG ---
-UPDATE_INTERVAL_MS = 30000
+UPDATE_INTERVAL_MS = 10000
 RA_BASE_URL = "https://retroachievements.org/API"
 RA_IMG_BASE = "https://media.retroachievements.org"
 
