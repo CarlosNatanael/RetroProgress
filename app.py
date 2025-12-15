@@ -112,7 +112,7 @@ class OverlayWidget(QWidget):
             progress_response.raise_for_status()
             progress_data = progress_response.json()
             
-            unlocked = progress_data.get('NumAchieved', 0)
+            unlocked = progress_data.get('NumAwardedToUserHardcore', 0)
             total = progress_data.get('NumAchievements', 0)
 
             game_title = progress_data.get('Title', 'Jogo Desconhecido')
@@ -143,7 +143,7 @@ class OverlayWidget(QWidget):
 
             self.dragPos = event.globalPosition().toPoint()
             event.accept()
-            
+
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.dragPos = None
