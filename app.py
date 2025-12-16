@@ -3,7 +3,7 @@ import requests
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QHBoxLayout, QDialog, QLineEdit, QPushButton, QFormLayout, QMessageBox
 )
-from PySide6.QtCore import Qt, QTimer, QUrl, QByteArray
+from PySide6.QtCore import Qt, QTimer, QUrl, QByteArray, QSize
 from utilidades_config import load_credentials, save_credentials, clear_credentials
 from PySide6.QtGui import QPixmap
 from io import BytesIO
@@ -17,68 +17,81 @@ RA_IMG_BASE = "https://media.retroachievements.org"
 class ConfigWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Configuração RetroProgress")
+        self.setWindowTitle("RetroProgress - Configuração")
         self.setFixedSize(350, 250)
         self.creds_saved = False
 
+        # --- Estilização da Janela (Estilo RA Dark) ---
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setStyleSheet("""
             QDialog {
-                background-color: #2c3e50; /* Fundo escuro */
-                border: 2px solid #3498db; /* Borda azul */
-                border-radius: 10px; /* Cantos arredondados */
+                background-color: #1f1f1f; /* Fundo mais escuro, estilo RA */
+                border: 1px solid #444444; /* Borda sutil */
+                border-radius: 8px; /* Cantos arredondados */
             }
             QLabel {
-                color: #ecf0f1; /* Texto claro */
+                color: #e0e0e0; /* Texto claro */
                 font-weight: bold;
+                padding-top: 5px; /* Espaçamento interno para os rótulos */
+            }
+            QLineEdit {
+                background-color: #2c2c2c; /* Fundo do campo sutilmente mais claro */
+                color: #ffffff; /* Texto branco */
+                border: 1px solid #555555; /* Borda de campo */
+                padding: 8px;
+                border-radius: 4px;
+                font-size: 14px;
             }
             QPushButton {
-                background-color: #3498db; /* Azul vibrante */
+                background-color: #1a73e8; /* Azul forte e característico */
                 color: white;
                 border: none;
                 padding: 10px;
-                border-radius: 5px;
+                border-radius: 4px;
                 font-size: 14px;
+                font-weight: bold;
+                margin-top: 15px; /* Margem superior para separar dos campos */
             }
             QPushButton:hover {
-                background-color: #2980b9; /* Azul mais escuro no hover */
-            }
-            QLineEdit {
-                background-color: #34495e; /* Fundo do campo um pouco mais claro que o fundo */
-                color: #ecf0f1;
-                border: 1px solid #7f8c8d;
-                padding: 5px;
-                border-radius: 4px;
+                background-color: #0b50a3; /* Azul mais escuro no hover */
             }
         """)
+        # -----------------------------------------------------------
 
         layout = QFormLayout(self)
         layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
         
+        # Título
         title_label = QLabel("RetroProgress - Configuração de API")
         title_label.setAlignment(Qt.AlignCenter)
-        title_label.setStyleSheet("font-size: 16px; margin-bottom: 10px;")
+        title_label.setStyleSheet("font-size: 18px; margin-bottom: 10px; color: #1a73e8;") # Título em azul
         layout.addRow(title_label)
 
+        # Campo para Usuário
         self.user_input = QLineEdit()
         self.user_input.setPlaceholderText("Seu nome de Usuário RA")
         layout.addRow(QLabel("Usuário RA:"), self.user_input)
 
+        # Campo para API Key
         self.key_input = QLineEdit()
         self.key_input.setEchoMode(QLineEdit.Password)
         self.key_input.setPlaceholderText("Sua chave de API RA")
         layout.addRow(QLabel("API Key:"), self.key_input)
 
-
+        # Botão Salvar
         self.save_button = QPushButton("Salvar e Iniciar")
         self.save_button.clicked.connect(self.save_and_start)
-        layout.addRow(self.save_button) 
+        layout.addRow(self.save_button)
+
+        # Tenta pré-carregar credenciais
         user, key = load_credentials()
         if user:
              self.user_input.setText(user)
+
         self.setLayout(layout)
 
     def save_and_start(self):
+        # O restante da lógica de salvamento e validação permanece o mesmo
         user = self.user_input.text().strip()
         key = self.key_input.text().strip()
 
