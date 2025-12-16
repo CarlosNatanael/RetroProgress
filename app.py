@@ -21,7 +21,6 @@ class ConfigWindow(QDialog):
         self.setFixedSize(350, 250)
         self.creds_saved = False
 
-        # --- Estilização da Janela (Estilo RA Dark) ---
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setStyleSheet("""
             QDialog {
@@ -56,34 +55,29 @@ class ConfigWindow(QDialog):
                 background-color: #0b50a3; /* Azul mais escuro no hover */
             }
         """)
-        # -----------------------------------------------------------
 
         layout = QFormLayout(self)
         layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
         
-        # Título
         title_label = QLabel("RetroProgress - Configuração de API")
         title_label.setAlignment(Qt.AlignCenter)
         title_label.setStyleSheet("font-size: 18px; margin-bottom: 10px; color: #1a73e8;") # Título em azul
         layout.addRow(title_label)
 
-        # Campo para Usuário
         self.user_input = QLineEdit()
         self.user_input.setPlaceholderText("Seu nome de Usuário RA")
         layout.addRow(QLabel("Usuário RA:"), self.user_input)
 
-        # Campo para API Key
+
         self.key_input = QLineEdit()
         self.key_input.setEchoMode(QLineEdit.Password)
         self.key_input.setPlaceholderText("Sua chave de API RA")
         layout.addRow(QLabel("API Key:"), self.key_input)
 
-        # Botão Salvar
         self.save_button = QPushButton("Salvar e Iniciar")
         self.save_button.clicked.connect(self.save_and_start)
         layout.addRow(self.save_button)
 
-        # Tenta pré-carregar credenciais
         user, key = load_credentials()
         if user:
              self.user_input.setText(user)
@@ -91,7 +85,6 @@ class ConfigWindow(QDialog):
         self.setLayout(layout)
 
     def save_and_start(self):
-        # O restante da lógica de salvamento e validação permanece o mesmo
         user = self.user_input.text().strip()
         key = self.key_input.text().strip()
 
