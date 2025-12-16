@@ -21,7 +21,7 @@ Para usar o RetroProgress, você precisará do seu **Nome de Usuário** e da sua
 
 1.  Faça login no site do RetroAchievements.
 2.  Acesse **Account Settings** (Configurações da Conta).
-3.  A chave está listada como **"Web API Key"** na seção "Developer". Copie o valor.
+3.  A chave está listada como **"Web API Key"** Copie o valor.
 
 ### 2. Configuração Inicial
 
