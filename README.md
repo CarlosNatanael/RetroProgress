@@ -6,7 +6,6 @@ O **RetroProgress** é um overlay minimalista e sem bordas, desenvolvido em Pyth
   <img width="397" height="126" alt="image" src="https://github.com/user-attachments/assets/89783e67-34ca-4fd5-b165-3ea8a61aff6e" />
 </p>
 
-
 ---
 
 ## ✨ Funcionalidades
