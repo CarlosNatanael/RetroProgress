@@ -267,9 +267,12 @@ class OverlayWidget(QWidget):
     def show_config_window(self):
             """Para o timer, limpa as credenciais e reinicia o aplicativo."""
             self.timer.stop()
-            clear_credentials()
-            self.close()
+            
+            clear_credentials() 
+            
             QApplication.instance().restart_required = True
+            self.close()
+            QApplication.instance().exit()
 
 def run_app():
     app = QApplication(sys.argv)
