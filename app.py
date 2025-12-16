@@ -171,7 +171,6 @@ class OverlayWidget(QWidget):
     def update_progress(self):
         print(f"\n[{datetime.now().strftime('%H:%M:%S')}] --- INICIANDO REQUISIÇÕES (Intervalo: 5s) ---") # LOG
         try:
-            # --- PASSO 1: Obter o ID do Jogo Atual ---
             summary_url = f"{RA_BASE_URL}/API_GetUserSummary.php"
             summary_params = {'z': RA_USER, 'y': RA_API_KEY, 'u': RA_USER}
             
@@ -189,8 +188,6 @@ class OverlayWidget(QWidget):
                 return
             
             self.current_game_id = last_game_id
-            
-            # --- PASSO 2: Obter o Progresso do Jogo Atual ---
             progress_url = f"{RA_BASE_URL}/API_GetGameInfoAndUserProgress.php"
             progress_params = {
                 'g': self.current_game_id, 
@@ -225,7 +222,6 @@ class OverlayWidget(QWidget):
                 self.timer.stop()
                 print(f"[{datetime.now().strftime('%H:%M:%S')}] ERRO 401/403: Requer reconfiguração.")
             else:
-                # Outros erros (conexão, servidor, etc.)
                 self.label_progresso.setText("ERRO: Verifique a conexão. (Status: {status_code})")
                 print(f"[{datetime.now().strftime('%H:%M:%S')}] ERRO de conexão/API (Status: {status_code}): {e}") # LOG DETALHADO
             self.label_progresso.setText("ERRO: Verifique a conexão, Usuario ou API Key.")
@@ -233,10 +229,26 @@ class OverlayWidget(QWidget):
             print(f"[{datetime.now().strftime('%H:%M:%S')}] ERRO inesperado: {e}") # LOG
             self.label_progresso.setText("ERRO")
 
-
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.dragPos = event.globalPosition().toPoint()
+            event.accept()
+        elif event.button() == Qt.RightButton:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Ação de Fechamento (Clique Direito). ENCERRANDO.")
+            self.timer.stop() 
+            self.close() 
+            QApplication.instance().quit() 
+            event.accept()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape or \
+           (event.key() == Qt.Key_Q and event.modifiers() == Qt.ControlModifier):
+            
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Ação de Fechamento (Teclado). ENCERRANDO.")
+            
+            self.timer.stop() 
+            self.close() 
+            QApplication.instance().quit() 
             event.accept()
 
     def mouseMoveEvent(self, event):
@@ -286,6 +298,6 @@ def run_app():
         else:
             QMessageBox.critical(None, "Erro Crítico", "As credenciais não foram fornecidas. O aplicativo será encerrado.")
             return 1
-
+        
 if __name__ == "__main__":
     sys.exit(run_app())
