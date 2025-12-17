@@ -1,4 +1,4 @@
-# 🎮 RetroProgress: RetroAchievements Overlay
+# 🎮 RetroProgress Overlay
 
 O **RetroProgress** é um overlay minimalista e sem bordas, desenvolvido em Python e PySide6, para exibir o progresso de conquistas Hardcore do jogo atual no RetroAchievements. Ideal para streamers que utilizam ferramentas como OBS/Streamlabs.
 
@@ -27,6 +27,11 @@ Para usar o RetroProgress, você precisará do seu **Nome de Usuário** e da sua
 
 ### 2. Configuração Inicial
 Na primeira execução, o aplicativo exibirá a tela de configuração:
+
+<p align="center">
+  <img width="390" height="312" alt="image" src="https://github.com/user-attachments/assets/e196c6c3-cc8c-437f-86a1-afce9888a8d0" />
+</p>
+
 1. Insira seu **Nome de Usuário**.
 2. Cole a **Web API Key** capturada anteriormente.
 3. Clique em **"Salvar e Iniciar"**.
