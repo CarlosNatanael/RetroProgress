@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QTimer, QByteArray
 from utilidades_config import load_credentials, save_credentials, clear_credentials
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QIcon
 import ctypes
 try:
     myappid = 'carlos.retroprogress.overlay.1' 
@@ -119,6 +119,10 @@ class OverlayWidget(QWidget):
         self.label_progresso.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.label_progresso)
 
+        self.setWindowIcon(QIcon("icon.ico"))
+
+        self.current_game_id = 0
+
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_progress)
         self.timer.start(UPDATE_INTERVAL_MS)
@@ -174,11 +178,9 @@ class OverlayWidget(QWidget):
             self.dragPos = event.globalPosition().toPoint()
 
     def keyPressEvent(self, event):
-        # ESC -> Sair
         if event.key() == Qt.Key_Escape:
             self.timer.stop()
             QApplication.instance().quit()
-        # CTRL + Q -> Resetar Login
         elif event.key() == Qt.Key_Q and (event.modifiers() & Qt.ControlModifier):
             self.timer.stop()
             clear_credentials()
@@ -188,6 +190,7 @@ class OverlayWidget(QWidget):
 
 def run_app():
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon("icon.ico"))
     while True:
         global RA_USER, RA_API_KEY
         RA_USER, RA_API_KEY = load_credentials()
