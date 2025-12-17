@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt, QTimer, QByteArray
 from utilidades_config import load_credentials, save_credentials, clear_credentials
 from PySide6.QtGui import QPixmap, QIcon
 from datetime import datetime
+import os
 
 import ctypes
 try:
@@ -126,7 +127,7 @@ class OverlayWidget(QWidget):
             }
         """)
 
-        self.setWindowIcon(QIcon("icon.ico"))
+        self.setWindowIcon(QIcon(resource_path("icon.ico")))
 
         self.current_game_id = 0
 
@@ -261,9 +262,17 @@ class OverlayWidget(QWidget):
             self.close()
             QApplication.instance().exit()
 
+def resource_path(relative_path):
+    """ Retorna o caminho absoluto para o recurso, funciona em dev e PyInstaller """
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 def run_app():
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon("icon.ico"))
+    app.setWindowIcon(QIcon(resource_path("icon.ico")))
     app.restart_required = False 
     while True:
         global RA_USER, RA_API_KEY
