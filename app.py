@@ -6,6 +6,12 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer, QByteArray
 from utilidades_config import load_credentials, save_credentials, clear_credentials
 from PySide6.QtGui import QPixmap
+import ctypes
+try:
+    myappid = 'carlos.retroprogress.overlay.1' 
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+except:
+    pass
 
 # --- CONFIG ---
 UPDATE_INTERVAL_MS = 5000

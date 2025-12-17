@@ -62,7 +62,6 @@ class ConfigWindow(QDialog):
                 background-color: #0b50a3; /* Azul mais escuro no hover */
             }
         """)
-        self.setWindowIcon(QIcon("icon.ico"))
         layout = QFormLayout(self)
         layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
         
