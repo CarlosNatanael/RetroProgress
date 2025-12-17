@@ -8,7 +8,7 @@ O **RetroProgress** é um overlay minimalista e sem bordas, desenvolvido em Pyth
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 * **Progresso em Tempo Real**: Atualização automática a cada 5 segundos.
 * **Segurança (Keyring)**: Credenciais (Usuário e API Key) armazenadas de forma segura e criptografada no sistema operacional.
@@ -17,7 +17,7 @@ O **RetroProgress** é um overlay minimalista e sem bordas, desenvolvido em Pyth
 
 ---
 
-## 🚀 Como Usar
+## Como Usar
 
 ### 1. Obtenha sua API Key
 Para usar o RetroProgress, você precisará do seu **Nome de Usuário** e da sua **Web API Key** no RetroAchievements:
@@ -41,7 +41,7 @@ Na primeira execução, o aplicativo exibirá a tela de configuração:
 
 ---
 
-## ⌨️ Atalhos e Controles
+## Atalhos e Controles
 
 Como o overlay não possui botões visíveis, utilize os seguintes comandos:
 
@@ -52,7 +52,7 @@ Como o overlay não possui botões visíveis, utilize os seguintes comandos:
 
 ---
 
-## ⚙️ Configurações Técnicas
+## Configurações Técnicas
 
 * **Intervalo de Atualização**: 5000ms (5 segundos).
 * **Tecnologias**: Python, PySide6, Requests, Keyring.
