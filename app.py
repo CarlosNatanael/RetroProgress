@@ -6,7 +6,6 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer, QByteArray
 from utilidades_config import load_credentials, save_credentials, clear_credentials
 from PySide6.QtGui import QPixmap
-from datetime import datetime
 
 # --- CONFIG ---
 UPDATE_INTERVAL_MS = 5000
@@ -118,12 +117,6 @@ class OverlayWidget(QWidget):
         self.label_progresso.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.label_progresso)
 
-        self.config_button = QPushButton("⚙️")
-        self.config_button.setFixedSize(30, 30)
-        self.config_button.setFlat(True)
-        self.config_button.clicked.connect(self.show_config_window)
-        main_layout.addWidget(self.config_button)
-
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_progress)
         self.timer.start(UPDATE_INTERVAL_MS)
@@ -165,7 +158,7 @@ class OverlayWidget(QWidget):
             self.adjustSize()
         except requests.exceptions.RequestException as e:
             if getattr(e.response, 'status_code', 0) in [401, 403]:
-                self.label_progresso.setText("Erro de Login (⚙️)")
+                self.label_progresso.setText("Erro de Login")
                 self.timer.stop()
             else:
                 self.label_progresso.setText("Erro de Conexão")
@@ -186,6 +179,12 @@ class OverlayWidget(QWidget):
         if event.key() == Qt.Key_Escape:
             self.timer.stop()
             QApplication.instance().quit()
+        
+        elif event.key() == Qt.Key_Q and (event.modifiers() & Qt.ControlModifier):
+            self.timer.stop()
+            clear_credentials()
+            QApplication.instance().restart_required = True
+            QApplication.instance().exit()
 
     def show_config_window(self):
         self.timer.stop()
