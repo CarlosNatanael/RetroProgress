@@ -5,8 +5,16 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QTimer, QByteArray
 from utilidades_config import load_credentials, save_credentials, clear_credentials
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QIcon
 from datetime import datetime
+
+import ctypes
+try:
+    # Identificador único para o Windows agrupar o ícone corretamente
+    myappid = 'carlos.retroprogress.overlay.1' 
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+except:
+    pass
 
 # --- CONFIG ---
 UPDATE_INTERVAL_MS = 5000
@@ -54,7 +62,7 @@ class ConfigWindow(QDialog):
                 background-color: #0b50a3; /* Azul mais escuro no hover */
             }
         """)
-
+        self.setWindowIcon(QIcon("icon.ico"))
         layout = QFormLayout(self)
         layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
         
@@ -118,6 +126,11 @@ class OverlayWidget(QWidget):
                 font-weight: bold;
             }
         """)
+
+        self.setWindowIcon(QIcon("icon.ico"))
+
+        self.current_game_id = 0
+
         self.label_progresso.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.label_progresso)
 
@@ -251,6 +264,7 @@ class OverlayWidget(QWidget):
 
 def run_app():
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon("icon.ico"))
     app.restart_required = False 
     while True:
         global RA_USER, RA_API_KEY
