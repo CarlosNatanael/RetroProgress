@@ -3,7 +3,7 @@
 O **RetroProgress** é um overlay minimalista e sem bordas, desenvolvido em Python e PySide6, para exibir o progresso de conquistas Hardcore do jogo atual no RetroAchievements. Ideal para streamers que utilizam ferramentas como OBS/Streamlabs.
 
 <p align="center">
-  <img width="397" height="126" alt="image" src="https://github.com/user-attachments/assets/89783e67-34ca-4fd5-b165-3ea8a61aff6e" />
+  <img width="397" height="126" alt="image" src="https://github.com/user-attachments/assets/48653829-8d91-4f6e-b290-28e8a4037542" />
 </p>
 
 ---
