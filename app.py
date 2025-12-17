@@ -17,8 +17,6 @@ class ConfigWindow(QDialog):
         super().__init__(parent)
         self.setWindowTitle("RetroProgress - Configuração")
         self.setFixedSize(350, 250)
-        self.creds_saved = False
-
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setStyleSheet("""
             QDialog {
@@ -88,13 +86,11 @@ class ConfigWindow(QDialog):
             return
         
         save_credentials(user, key)
-        self.creds_saved = True
         self.accept()
 
 class OverlayWidget(QWidget):
     def __init__(self):
         super().__init__()
-        self.current_game_id = 0
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
         
@@ -156,12 +152,8 @@ class OverlayWidget(QWidget):
             self.label_progresso.setText(f"{data.get('Title', '---')}\n{unlocked}/{total}")
             self._fetch_and_set_emblen(data.get('ImageIcon'))
             self.adjustSize()
-        except requests.exceptions.RequestException as e:
-            if getattr(e.response, 'status_code', 0) in [401, 403]:
-                self.label_progresso.setText("Erro de Login")
-                self.timer.stop()
-            else:
-                self.label_progresso.setText("Erro de Conexão")
+        except:
+            self.label_progresso.setText("Erro de Conexão")
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -176,22 +168,17 @@ class OverlayWidget(QWidget):
             self.dragPos = event.globalPosition().toPoint()
 
     def keyPressEvent(self, event):
+        # ESC -> Sair
         if event.key() == Qt.Key_Escape:
             self.timer.stop()
             QApplication.instance().quit()
-        
+        # CTRL + Q -> Resetar Login
         elif event.key() == Qt.Key_Q and (event.modifiers() & Qt.ControlModifier):
             self.timer.stop()
             clear_credentials()
             QApplication.instance().restart_required = True
+            self.close()
             QApplication.instance().exit()
-
-    def show_config_window(self):
-        self.timer.stop()
-        clear_credentials()
-        QApplication.instance().restart_required = True
-        self.close()
-        QApplication.instance().exit()
 
 def run_app():
     app = QApplication(sys.argv)
