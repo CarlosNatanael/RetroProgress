@@ -3,10 +3,9 @@ import requests
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QHBoxLayout, QDialog, QLineEdit, QPushButton, QFormLayout, QMessageBox
 )
-from PySide6.QtCore import Qt, QTimer, QUrl, QByteArray, QSize
+from PySide6.QtCore import Qt, QTimer, QByteArray
 from utilidades_config import load_credentials, save_credentials, clear_credentials
 from PySide6.QtGui import QPixmap
-from io import BytesIO
 from datetime import datetime
 
 # --- CONFIG ---
@@ -61,7 +60,7 @@ class ConfigWindow(QDialog):
         
         title_label = QLabel("RetroProgress - Configuração de API")
         title_label.setAlignment(Qt.AlignCenter)
-        title_label.setStyleSheet("font-size: 18px; margin-bottom: 10px; color: #1a73e8;") # Título em azul
+        title_label.setStyleSheet("font-size: 18px; margin-bottom: 10px; color: #1a73e8;")
         layout.addRow(title_label)
 
         self.user_input = QLineEdit()
@@ -99,24 +98,16 @@ class ConfigWindow(QDialog):
 class OverlayWidget(QWidget):
     def __init__(self):
         super().__init__()
-
-        self.current_game_id = 0
-
-        self.setWindowFlags(
-            Qt.WindowStaysOnTopHint |
-            Qt.FramelessWindowHint |
-            Qt.Tool
-        )
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
         
         main_layout = QHBoxLayout(self)
         
         self.label_emblema = QLabel()
         self.label_emblema.setFixedSize(64, 64)
-        self.label_emblema.setStyleSheet("background-color: transparent;")
         main_layout.addWidget(self.label_emblema)
         
-        self.label_progresso = QLabel("Iniciando RetroProgress...")
+        self.label_progresso = QLabel("Carregando...")
         self.label_progresso.setStyleSheet("""
             QLabel {
                 background-color: rgba(30, 30, 30, 220);
@@ -129,18 +120,10 @@ class OverlayWidget(QWidget):
         """)
         self.label_progresso.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.label_progresso)
-        self.config_button = QPushButton("⚙️")
-        self.config_button.setFixedSize(30, 30)
-        self.config_button.setFlat(True)
-        self.config_button.clicked.connect(self.show_config_window)
-        main_layout.addWidget(self.config_button)
-
-        self.setLayout(main_layout)
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_progress)
         self.timer.start(UPDATE_INTERVAL_MS)
-
         self.update_progress()
 
     def _fetch_and_set_emblen(self, icon_path):
@@ -217,7 +200,7 @@ class OverlayWidget(QWidget):
         except requests.exceptions.RequestException as e:
             status_code = getattr(e.response, 'status_code', 'N/A')
             if status_code == 401 or status_code == 403:
-                self.label_progresso.setText("ERRO: Credenciais RA Inválidas. Clique no ⚙️")
+                self.label_progresso.setText("ERRO: Credenciais RA Inválidas.")
                 self.cred_error_state = True
                 self.timer.stop()
                 print(f"[{datetime.now().strftime('%H:%M:%S')}] ERRO 401/403: Requer reconfiguração.")
@@ -235,34 +218,26 @@ class OverlayWidget(QWidget):
             event.accept()
         elif event.button() == Qt.RightButton:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] Ação de Fechamento (Clique Direito). ENCERRANDO.")
-            self.timer.stop() 
-            self.close() 
-            QApplication.instance().quit() 
-            event.accept()
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Escape or \
-           (event.key() == Qt.Key_Q and event.modifiers() == Qt.ControlModifier):
-            
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] Ação de Fechamento (Teclado). ENCERRANDO.")
-            
-            self.timer.stop() 
-            self.close() 
+            self.timer.stop()
             QApplication.instance().quit() 
             event.accept()
 
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.LeftButton:
-            delta = event.globalPosition().toPoint() - self.dragPos
-            self.move(self.pos() + delta)
-
+            self.move(self.pos() + event.globalPosition().toPoint() - self.dragPos)
             self.dragPos = event.globalPosition().toPoint()
-            event.accept()
-            
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.dragPos = None
-            event.accept()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.timer.stop()
+            QApplication.instance().quit()
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Ação de Fechamento (Teclado). ENCERRANDO.") # LOG
+        elif event.key() == Qt.Key_Q and (event.modifiers() & Qt.ControlModifier):
+            self.timer.stop()
+            clear_credentials()
+            QApplication.instance().restart_required = True
+            self.close()
+            QApplication.instance().exit()
 
     def show_config_window(self):
             """Para o timer, limpa as credenciais e reinicia o aplicativo."""
