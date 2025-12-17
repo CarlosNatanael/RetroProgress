@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer, QByteArray
 from utilidades_config import load_credentials, save_credentials, clear_credentials
 from PySide6.QtGui import QPixmap, QIcon
+import os
 import ctypes
 try:
     myappid = 'carlos.retroprogress.overlay.1' 
@@ -119,7 +120,7 @@ class OverlayWidget(QWidget):
         self.label_progresso.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.label_progresso)
 
-        self.setWindowIcon(QIcon("icon.ico"))
+        self.setWindowIcon(QIcon(resource_path("icon.ico")))
 
         self.current_game_id = 0
 
@@ -188,9 +189,16 @@ class OverlayWidget(QWidget):
             self.close()
             QApplication.instance().exit()
 
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 def run_app():
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon("icon.ico"))
+    app.setWindowIcon(QIcon(resource_path("icon.ico")))
     while True:
         global RA_USER, RA_API_KEY
         RA_USER, RA_API_KEY = load_credentials()
