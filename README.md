@@ -21,7 +21,7 @@ O **RetroProgress** é um overlay minimalista e sem bordas, desenvolvido em Pyth
 
 ### 1. Obtenha sua API Key
 Para usar o RetroProgress, você precisará do seu **Nome de Usuário** e da sua **Web API Key** no RetroAchievements:
-1. Faça login no site do [RetroAchievements](https://retroachievements.org).
+1. Faça login no site do [RetroAchievements](https://retroachievements.org/settings).
 2. Acesse **Account Settings** (Configurações da Conta).
 3. A chave está listada como **"Web API Key"** Copie o valor.
 
